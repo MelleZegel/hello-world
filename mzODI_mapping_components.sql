@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- ODI 12.1.3 Work repository
 --
--- Select table with components
+-- Select mappings with components
 --
 --------------------------------------------------------------------------------
 WITH mc AS (
@@ -11,6 +11,8 @@ LEFT JOIN odi_odi_repo.snp_map_ref  mr     ON mc.i_map_ref = mr.i_map_ref
 LEFT JOIN odi_odi_repo.snp_table    t      ON mr.i_ref_id  = t.i_table
   )
 SELECT    mpg.NAME, mc_m.i_map_comp, mc_m.mc_name, mc_m.mc_type_name, mc_m.table_name
+,         CASE WHEN  mc_m.mc_type_name = 'DATASTORE' AND mcp.direction = 'O' THEN 'Source'
+               WHEN  mc_m.mc_type_name = 'DATASTORE' AND mcp.direction = 'I' THEN 'Target' END src_tgt
 ,         mcp.direction, mcp.name mcp_name
 ,         mci.mc_name in_comp_name,  mci.table_name in_table_name
 ,         mco.mc_name out_comp_name, mco.table_name out_table_name
@@ -26,8 +28,9 @@ LEFT JOIN odi_odi_repo.snp_map_conn mcno   ON mcp.i_map_cp                   = m
 LEFT JOIN odi_odi_repo.snp_map_cp   mcpo   ON mcpo.i_map_cp                  = mcno.i_end_map_cp
 LEFT JOIN mc                        mco    ON mco.i_map_comp                 = mcpo.i_owner_map_comp 
 WHERE     ((mcp.direction = 'O' AND mcno.i_start_map_cp IS NOT NULL) OR (mcp.direction = 'I' AND mcni.i_end_map_cp IS NOT NULL))
---AND       mpg.NAME       LIKE 'DWH_MY_MAP%'
-AND       mci.table_name LIKE 'DWH%'
-AND       mc_m.mc_type_name = 'LOOKUP' 
+AND       mpg.NAME       LIKE 'EDW_MAP_S%'
+--AND       mci.table_name LIKE 'EDW_DOT_L%'
+--AND       mc_m.mc_type_name = 'DATASTORE' 
 ORDER BY  mpg.NAME, mc_m.i_map_comp, mcp.direction, mcp.name
 ;
+
