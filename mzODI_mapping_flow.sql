@@ -12,7 +12,23 @@ JOIN      snp_mapping  m     on m.i_mapping             = comp.i_owner_mapping
 LEFT JOIN snp_map_ref  mr    ON comp.i_map_ref          = mr.i_map_ref
 LEFT JOIN snp_table    t     ON mr.i_ref_id             = t.i_table
   )
-select * 
+select level
+     ,  RPAD('.', (level-1)*2, '.') || comp_name AS tree
+     , LTRIM(SYS_CONNECT_BY_PATH(comp_name, '-'), '-') AS path
+     , mcn.* 
 from   mcn
+connect by i_cps = prior i_cpe
+order by mapping, 1, comp_name
+--------------------------------------------------------------------------------
 
-order by mapping, comp_name
+--SELECT id,
+--       parent_id,
+--       RPAD('.', (level-1)*2, '.') || id AS tree,
+--       level,
+--       CONNECT_BY_ROOT id AS root_id,
+--       LTRIM(SYS_CONNECT_BY_PATH(id, '-'), '-') AS path,
+--       CONNECT_BY_ISLEAF AS leaf
+--FROM   tab1
+--START WITH parent_id IS NULL
+--CONNECT BY parent_id = PRIOR id
+--ORDER SIBLINGS BY id;
